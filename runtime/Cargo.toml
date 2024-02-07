@@ -42,6 +42,8 @@ sp-version = { version = "22.0.0", default-features = false, git = "https://gith
 # ORML 
 orml-nft = { version = "0.4.1-dev", default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v1.0.0" }
 
+#local pallets
+nft = { version = "1.0.0", default-features = false, path = "../pallets/nft" }
 
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
@@ -87,7 +89,8 @@ std = [
 	"sp-transaction-pool/std",
 	"sp-version/std",
 	"substrate-wasm-builder",
-	"orml-nft/std"
+	"orml-nft/std",
+	#"nft/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -98,7 +101,9 @@ runtime-benchmarks = [
 	"pallet-grandpa/runtime-benchmarks",
 	"pallet-sudo/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
-	"sp-runtime/runtime-benchmarks"
+	"sp-runtime/runtime-benchmarks",
+	"nft/runtime-benchmarks",
+
 ]
 try-runtime = [
 	"frame-try-runtime/try-runtime",
@@ -110,5 +115,7 @@ try-runtime = [
 	"pallet-grandpa/try-runtime",
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
-	"pallet-transaction-payment/try-runtime"
+	"pallet-transaction-payment/try-runtime",
+	"orml-nft/try-runtime",
+	"nft/try-runtime",
 ]

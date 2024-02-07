@@ -46,8 +46,8 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-
-
+//pub use nft;
+pub use nft;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -276,7 +276,13 @@ impl orml_nft::Config for Runtime {
 	type MaxClassMetadata = ConstU32<1024>;
 	type MaxTokenMetadata = ConstU32<1024>;
 }
+ 
 
+
+impl nft::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = nft::weights::SubstrateWeight<Runtime>;
+}
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -288,7 +294,8 @@ construct_runtime!(
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
-		OrmlNFT: orml_nft
+		OrmlNFT: orml_nft,
+		NFT: nft
 	}
 );
 
