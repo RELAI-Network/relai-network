@@ -15,45 +15,45 @@ targets = ["x86_64-unknown-linux-gnu"]
 [dependencies]
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
-pallet-aura =  { workspace = true }
-pallet-balances =  { workspace = true }
-frame-support =  { workspace = true }
-pallet-grandpa =  { workspace = true }
-pallet-sudo =  { workspace = true }
-frame-system =  { workspace = true }
-frame-try-runtime =  { workspace = true }
-pallet-timestamp =  { workspace = true }
-pallet-transaction-payment =  { workspace = true }
-frame-executive =  { workspace = true }
-sp-api =  { workspace = true }
+pallet-aura = { workspace = true }
+pallet-balances = { workspace = true }
+frame-support = { workspace = true }
+pallet-grandpa = { workspace = true }
+pallet-sudo = { workspace = true }
+frame-system = { workspace = true }
+frame-try-runtime = { workspace = true }
+pallet-timestamp = { workspace = true }
+pallet-transaction-payment = { workspace = true }
+frame-executive = { workspace = true }
+sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
-sp-consensus-aura =  { workspace = true }
-sp-consensus-grandpa =  { workspace = true }
+sp-consensus-aura = { workspace = true }
+sp-consensus-grandpa = { workspace = true }
 sp-core = { workspace = true }
-sp-inherents =  { workspace = true }
-sp-offchain =  { workspace = true }
-sp-runtime =  { workspace = true }
-sp-session =  { workspace = true }
+sp-inherents = { workspace = true }
+sp-offchain = { workspace = true }
+sp-runtime = { workspace = true }
+sp-session = { workspace = true }
 sp-std = { workspace = true }
-sp-transaction-pool =  { workspace = true }
-sp-version =  { workspace = true }
+sp-transaction-pool = { workspace = true }
+sp-version = { workspace = true }
 
 # ORML 
 orml-nft = { workspace = true }
 
 #local pallets
-nft = { version = "0.1.0", default-features = false, path = "../pallets/nft" }
+nft = { workspace = true }
 
-# Used for the node template's RPCs
-frame-system-rpc-runtime-api = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
-pallet-transaction-payment-rpc-runtime-api = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+# Used for the node 's RPCs
+frame-system-rpc-runtime-api = { workspace = true }
+pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 
-# Used for runtime benchmarking
-frame-benchmarking = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v1.0.0" }
-frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v1.0.0" }
+# Used for Benchmarking
+frame-benchmarking = { workspace = true, optional = true }
+frame-system-benchmarking = { workspace = true, optional = true }
 
 [build-dependencies]
-substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v1.0.0" }
+substrate-wasm-builder = { workspace = true, optional = true }
 
 [features]
 default = ["std"]
@@ -89,7 +89,7 @@ std = [
 	"sp-version/std",
 	"substrate-wasm-builder",
 	"orml-nft/std",
-	#"nft/std"
+	"nft/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -102,7 +102,6 @@ runtime-benchmarks = [
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 	"nft/runtime-benchmarks",
-
 ]
 try-runtime = [
 	"frame-try-runtime/try-runtime",
