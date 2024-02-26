@@ -88,3 +88,5 @@ orml-nft = { version = "0.4.1-dev", default-features = false, git = "https://git
 
 # Local Modules
 nft = { version = "0.1.0", default-features = false, path = "pallets/nft" }
+relai-primitives = { version = "0.1.0", default-features = false, path = "primitives"}
+
