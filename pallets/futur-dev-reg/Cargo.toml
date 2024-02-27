@@ -37,6 +37,7 @@ std = [
 	"frame-system/std",
 	"scale-info/std",
 	"sp-std/std",
+	"sp-core/std",
 	"relai-primitives/std"
 
 ]

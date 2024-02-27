@@ -1,5 +1,5 @@
 use crate::{mock::*, Event};
-use frame_support::{ assert_ok};
+use frame_support::assert_ok;
 
 #[test]
 fn it_works_for_default_value() {
@@ -9,6 +9,6 @@ fn it_works_for_default_value() {
 		// Dispatch a signed extrinsic.
 		assert_ok!(NFT::create_class(RuntimeOrigin::signed(1)));
 		// Assert that the correct event was deposited
-		System::assert_last_event(Event::NftClassCreated{ owner: 1 }.into());
+		System::assert_last_event(Event::NftClassCreated { owner: 1 }.into());
 	});
 }

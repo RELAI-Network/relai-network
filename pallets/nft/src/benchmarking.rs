@@ -16,7 +16,6 @@ mod benchmarks {
 		let caller: T::AccountId = whitelisted_caller();
 		#[extrinsic_call]
 		create_class(RawOrigin::Signed(caller));
-
 	}
 
 	impl_benchmark_test_suite!(NFT, crate::mock::new_test_ext(), crate::mock::Test);

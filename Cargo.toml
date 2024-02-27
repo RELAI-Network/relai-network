@@ -87,6 +87,7 @@ substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/pa
 orml-nft = { version = "0.4.1-dev", default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v1.0.0" }
 
 # Local Modules
-nft = { version = "0.1.0", default-features = false, path = "pallets/nft" }
 relai-primitives = { version = "0.1.0", default-features = false, path = "primitives"}
+nft = { version = "0.1.0", default-features = false, path = "pallets/nft" }
+futur-dev-reg = { version = "0.1.0", default-features = false, path = "pallets/futur-dev-reg" }
 

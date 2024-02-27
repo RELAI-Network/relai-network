@@ -46,8 +46,9 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-//pub use nft;
 pub use nft;
+
+pub use futur_dev_reg;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -67,6 +68,7 @@ pub type Nonce = u32;
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
+
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -276,13 +278,17 @@ impl orml_nft::Config for Runtime {
 	type MaxClassMetadata = ConstU32<1024>;
 	type MaxTokenMetadata = ConstU32<1024>;
 }
- 
-
 
 impl nft::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = nft::weights::SubstrateWeight<Runtime>;
 }
+
+impl futur_dev_reg::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+}
+
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -295,7 +301,8 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		OrmlNFT: orml_nft,
-		NFT: nft
+		NFT: nft,
+		FuturDevReg: futur_dev_reg
 	}
 );
 
