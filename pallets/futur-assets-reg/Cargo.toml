@@ -1,7 +1,7 @@
 [package]
-name = "futur-dev-reg"
+name = "futur-assets-reg"
 version = "0.1.0"
-description = "Futur Protocol Dev Registry Pallet."
+description = "Futur Protocol Assets Registry Pallet."
 authors = ["Relai Network <relainetwork@gmail.com>"]
 homepage = "https://relai.network"
 edition = "2021"

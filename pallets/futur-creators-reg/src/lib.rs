@@ -2,7 +2,7 @@
 
 pub use pallet::*;
 
-pub use relai_primitives::devreg;
+pub use relai_primitives::creatorsreg;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -17,7 +17,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 
-	use relai_primitives::devreg::DevInfo;
+	use relai_primitives::creatorsreg::DevInfo;
 
 	pub type BalanceOf<T> =
 		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -49,19 +49,35 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		RegistrationFeeSet,
-		PotAddressSet,
 		DevRegistered { who: T::AccountId, id: u32 },
+		DevUnRegistered { who: T::AccountId },
 	}
 
 	#[pallet::error]
 	pub enum Error<T> {
 		DevAlreadyRegistered,
+		DevNotFound
 	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 
 		#[pallet::call_index(0)]
+		#[pallet::weight({10000})]
+		pub fn set_registration_fee(
+			origin: OriginFor<T>,
+			amount: BalanceOf<T>,
+		) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+
+			RegFee::<T>::set(amount);
+
+			Self::deposit_event(Event::RegistrationFeeSet);
+
+			Ok(().into())
+		}
+
+		#[pallet::call_index(1)]
 		#[pallet::weight({10000})]
 		pub fn register_developer(
 			origin: OriginFor<T>,
@@ -90,7 +106,6 @@ pub mod pallet {
 			// Insert the new developer's information into the registry
 			DevRegistry::<T>::insert(&who, dev_infos);
 
-
 			//TODO: Withdraw from developar after setting where to put funds
 			/*
 			// Transfer the balance from the developer's account to the treasury
@@ -108,17 +123,20 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::call_index(1)]
+		#[pallet::call_index(2)]
 		#[pallet::weight({10000})]
-		pub fn set_registration_fee(
-			origin: OriginFor<T>,
-			amount: BalanceOf<T>,
+		pub fn unregister_developer(
+			origin: OriginFor<T>
 		) -> DispatchResultWithPostInfo {
-			ensure_root(origin)?;
+			let who = ensure_signed(origin)?;
 
-			RegFee::<T>::set(amount);
+			// Check if the developer's address exists in the registry
+			ensure!(!DevRegistry::<T>::contains_key(&who), Error::<T>::DevNotFound);
 
-			Self::deposit_event(Event::RegistrationFeeSet);
+			// Remove developer's information from the registry
+			DevRegistry::<T>::remove(&who);
+
+			Self::deposit_event(Event::DevUnRegistered { who });
 
 			Ok(().into())
 		}

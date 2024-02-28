@@ -48,7 +48,9 @@ pub use sp_runtime::{Perbill, Permill};
 
 pub use nft;
 
-pub use futur_dev_reg;
+pub use futur_creators_reg;
+
+pub use futur_assets_reg;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -284,7 +286,12 @@ impl nft::Config for Runtime {
 	type WeightInfo = nft::weights::SubstrateWeight<Runtime>;
 }
 
-impl futur_dev_reg::Config for Runtime {
+impl futur_creators_reg::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+}
+
+impl futur_assets_reg::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 }
@@ -302,7 +309,8 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		OrmlNFT: orml_nft,
 		NFT: nft,
-		FuturDevReg: futur_dev_reg
+		FuturCreatorsReg: futur_creators_reg,
+		FuturAssetsReg: futur_assets_reg,
 	}
 );
 

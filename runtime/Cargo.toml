@@ -43,7 +43,8 @@ orml-nft = { workspace = true }
 
 #local pallets
 nft = { workspace = true }
-futur-dev-reg ={ workspace = true }
+futur-creators-reg ={ workspace = true }
+futur-assets-reg ={ workspace = true }
 
 # Used for the node 's RPCs
 frame-system-rpc-runtime-api = { workspace = true }
@@ -91,7 +92,8 @@ std = [
 	"substrate-wasm-builder",
 	"orml-nft/std",
 	"nft/std",
-	"futur-dev-reg/std"
+	"futur-creators-reg/std",
+	"futur-assets-reg/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -118,5 +120,6 @@ try-runtime = [
 	"pallet-transaction-payment/try-runtime",
 	"orml-nft/try-runtime",
 	"nft/try-runtime",
-	"futur-dev-reg/try-runtime"
+	"futur-creators-reg/try-runtime",
+	"futur-assets-reg/try-runtime"
 ]

@@ -1,1 +1,0 @@
-# Futur protocol Dev Registry Pallet 

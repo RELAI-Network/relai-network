@@ -1,3 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub mod devreg;
+pub mod common;
+pub mod creatorsreg;
+pub mod assetsreg;

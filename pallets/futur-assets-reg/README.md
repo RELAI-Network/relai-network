@@ -1,0 +1,1 @@
+# Futur protocol Assets Registry Pallet 
