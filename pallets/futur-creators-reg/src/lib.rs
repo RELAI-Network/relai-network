@@ -8,14 +8,10 @@ pub use relai_primitives::creatorsreg;
 pub mod pallet {
 	use super::*;
 	use frame_support::{
-		dispatch::DispatchResultWithPostInfo,
-		pallet_prelude::*,
-		sp_runtime,
-		traits::{Currency}
-		};
+		dispatch::DispatchResultWithPostInfo, pallet_prelude::*, sp_runtime, traits::Currency,
+	};
 
 	use frame_system::pallet_prelude::*;
-
 
 	use relai_primitives::creatorsreg::DevInfo;
 
@@ -56,12 +52,11 @@ pub mod pallet {
 	#[pallet::error]
 	pub enum Error<T> {
 		DevAlreadyRegistered,
-		DevNotFound
+		DevNotFound,
 	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-
 		#[pallet::call_index(0)]
 		#[pallet::weight({10000})]
 		pub fn set_registration_fee(
@@ -93,12 +88,7 @@ pub mod pallet {
 			// Generate a new unique ID for the developer
 			let id = Self::next_dev_id() + 1;
 
-			let	dev_infos: DevInfo = DevInfo {
-				id,
-				name,
-				email,
-				website
-			};
+			let dev_infos: DevInfo = DevInfo { id, name, email, website };
 
 			// Increment the counter
 			NextDevId::<T>::put(id);
@@ -125,9 +115,7 @@ pub mod pallet {
 
 		#[pallet::call_index(2)]
 		#[pallet::weight({10000})]
-		pub fn unregister_developer(
-			origin: OriginFor<T>
-		) -> DispatchResultWithPostInfo {
+		pub fn unregister_developer(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
 			// Check if the developer's address exists in the registry
@@ -140,7 +128,6 @@ pub mod pallet {
 
 			Ok(().into())
 		}
-
 	}
 
 	#[pallet::genesis_config]
