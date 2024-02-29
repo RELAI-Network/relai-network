@@ -8,7 +8,7 @@ pub use relai_primitives::creatorsreg;
 pub mod pallet {
 	use super::*;
 	use frame_support::{
-		dispatch::DispatchResultWithPostInfo, pallet_prelude::*, traits::Currency,
+		dispatch::DispatchResultWithPostInfo, ensure, pallet_prelude::*, traits::Currency,
 	};
 
 	use frame_system::pallet_prelude::*;
@@ -53,13 +53,20 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		AssetSubmited { creator: T::AccountId, id: AssetId },
+		AssetPublished { creator: T::AccountId, id: AssetId },
+		AssetUnPublished { creator: T::AccountId, id: AssetId },
+		AssetDeleted { creator: T::AccountId, id: AssetId },
 	}
 
 	#[pallet::error]
-	pub enum Error<T> {}
+	pub enum Error<T> {
+		AssetNotFound,
+		AssetNotUnpublished
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+
 		#[pallet::call_index(0)]
 		#[pallet::weight({10000})]
 		pub fn submit_asset(
@@ -67,12 +74,84 @@ pub mod pallet {
 			asset: AssetWrapper,
 			to_publish: bool,
 		) -> DispatchResultWithPostInfo {
-			let who = ensure_signed(origin)?;
+			let creator = ensure_signed(origin)?;
 
-			Self::do_submit_asset(&who, &asset, to_publish)?;
+			Self::do_submit_asset(&creator, &asset, to_publish)?;
 
 			Ok(().into())
 		}
+
+		#[pallet::call_index(1)]
+		#[pallet::weight({10000})]
+		pub fn publish_asset(
+			origin: OriginFor<T>,
+			asset_id: AssetId,
+		) -> DispatchResultWithPostInfo {
+			let creator = ensure_signed(origin)?;
+
+			ensure!(
+				AssetRegistry::<T>::contains_key(&creator, asset_id),
+				Error::<T>::AssetNotFound
+			);
+
+			AssetPublicationStatus::<T>::insert(asset_id, true);
+
+			Self::deposit_event(Event::AssetPublished { creator, id: asset_id });
+
+			Ok(().into())
+		}
+
+		#[pallet::call_index(2)]
+		#[pallet::weight({10000})]
+		pub fn un_publish_asset(
+			origin: OriginFor<T>,
+			asset_id: AssetId,
+		) -> DispatchResultWithPostInfo {
+			let creator = ensure_signed(origin)?;
+
+			ensure!(
+				AssetRegistry::<T>::contains_key(&creator, asset_id),
+				Error::<T>::AssetNotFound
+			);
+
+			AssetPublicationStatus::<T>::insert(asset_id, false);
+
+			Self::deposit_event(Event::AssetUnPublished { creator, id: asset_id });
+
+			Ok(().into())
+		}
+
+
+		#[pallet::call_index(3)]
+		#[pallet::weight({10000})]
+		pub fn delete_asset(
+			origin: OriginFor<T>,
+			asset_id: AssetId,
+		) -> DispatchResultWithPostInfo {
+			let creator = ensure_signed(origin)?;
+
+			ensure!(
+				AssetRegistry::<T>::contains_key(&creator, asset_id) 
+				&& 
+				AssetPublicationStatus::<T>::contains_key(asset_id),
+				Error::<T>::AssetNotFound
+			);
+
+			ensure!(
+				AssetPublicationStatus::<T>::get(asset_id)
+					.map(|status| status.eq(&false))
+					.unwrap_or(true),
+				Error::<T>::AssetNotUnpublished
+			);
+			
+
+			AssetPublicationStatus::<T>::remove(asset_id);
+
+			Self::deposit_event(Event::AssetDeleted { creator, id: asset_id });
+
+			Ok(().into())
+		}
+
 	}
 
 	impl<T: Config> Pallet<T> {
