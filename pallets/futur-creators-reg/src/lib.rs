@@ -82,6 +82,8 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
+			//TODO: Add team feature to have more that one dev + RBAC on client side
+
 			// Check if the developer's address already exists in the registry
 			ensure!(!DevRegistry::<T>::contains_key(&who), Error::<T>::DevAlreadyRegistered);
 

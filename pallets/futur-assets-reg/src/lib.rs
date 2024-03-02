@@ -13,7 +13,7 @@ pub mod pallet {
 
 	use frame_system::pallet_prelude::*;
 
-	use relai_primitives::assetsreg::{AssetId, AssetWrapper};
+	use relai_primitives::assetsreg::{AssetId, Asset};
 
 	pub type BalanceOf<T> =
 		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -33,21 +33,34 @@ pub mod pallet {
 	pub(super) type NextAssetId<T: Config> = StorageValue<_, u32, ValueQuery>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn asset_regisitry)]
 	pub(super) type AssetRegistry<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
 		T::AccountId,
 		Blake2_128Concat,
 		AssetId,
-		AssetWrapper,
+		Asset<T::AccountId, BalanceOf<T>>,
 		OptionQuery,
 	>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn is_asset_published)]
+	pub(super) type AssetByCreator<T: Config> =
+		StorageMap<_, Blake2_128Concat, AssetId, T::AccountId, OptionQuery>;
+
+	#[pallet::storage]
 	pub(super) type AssetPublicationStatus<T: Config> =
 		StorageMap<_, Blake2_128Concat, AssetId, bool, OptionQuery>;
+
+	#[pallet::storage]
+	pub(super) type AssetPurchases<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		Blake2_128Concat,
+		AssetId,
+		bool,
+		OptionQuery,
+	>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -56,23 +69,23 @@ pub mod pallet {
 		AssetPublished { creator: T::AccountId, id: AssetId },
 		AssetUnPublished { creator: T::AccountId, id: AssetId },
 		AssetDeleted { creator: T::AccountId, id: AssetId },
+		AssetBought { buyer: T::AccountId, id: AssetId },
 	}
 
 	#[pallet::error]
 	pub enum Error<T> {
 		AssetNotFound,
-		AssetNotUnpublished
+		AssetNotUnpublished,
 	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-
 		#[pallet::call_index(0)]
 		#[pallet::weight({10000})]
 		pub fn submit_asset(
 			origin: OriginFor<T>,
-			asset: AssetWrapper,
-			to_publish: bool,
+			asset: Asset<T::AccountId, BalanceOf<T>>,
+			to_publish: bool
 		) -> DispatchResultWithPostInfo {
 			let creator = ensure_signed(origin)?;
 
@@ -121,19 +134,14 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-
 		#[pallet::call_index(3)]
 		#[pallet::weight({10000})]
-		pub fn delete_asset(
-			origin: OriginFor<T>,
-			asset_id: AssetId,
-		) -> DispatchResultWithPostInfo {
+		pub fn delete_asset(origin: OriginFor<T>, asset_id: AssetId) -> DispatchResultWithPostInfo {
 			let creator = ensure_signed(origin)?;
 
 			ensure!(
-				AssetRegistry::<T>::contains_key(&creator, asset_id) 
-				&& 
-				AssetPublicationStatus::<T>::contains_key(asset_id),
+				AssetRegistry::<T>::contains_key(&creator, asset_id) &&
+					AssetPublicationStatus::<T>::contains_key(asset_id),
 				Error::<T>::AssetNotFound
 			);
 
@@ -143,7 +151,6 @@ pub mod pallet {
 					.unwrap_or(true),
 				Error::<T>::AssetNotUnpublished
 			);
-			
 
 			AssetPublicationStatus::<T>::remove(asset_id);
 
@@ -152,12 +159,26 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		#[pallet::call_index(4)]
+		#[pallet::weight({10000})]
+		pub fn buy_asset(origin: OriginFor<T>, asset_id: AssetId) -> DispatchResultWithPostInfo {
+			let buyer = ensure_signed(origin)?;
+
+			Self::do_buy_asset(&buyer, asset_id)?;
+
+			Self::deposit_event(Event::AssetBought { buyer, id: asset_id });
+
+			Ok(().into())
+		}
+
+		//TODO: Add later Asset Ownership Transfer feature
 	}
 
 	impl<T: Config> Pallet<T> {
+
 		fn do_submit_asset(
 			creator: &T::AccountId,
-			asset: &AssetWrapper,
+			asset: &Asset<T::AccountId, BalanceOf<T>>,
 			to_publish: bool,
 		) -> DispatchResult {
 			let asset_id = Self::handle_id();
@@ -167,6 +188,16 @@ pub mod pallet {
 			AssetPublicationStatus::<T>::insert(asset_id, to_publish);
 
 			Self::deposit_event(Event::AssetSubmited { creator: creator.clone(), id: asset_id });
+
+			Ok(())
+		}
+
+		fn do_buy_asset(buyer: &T::AccountId, asset_id: AssetId) -> DispatchResult {
+			//TODO: implement payment
+
+			//T::Currency::transfer(buyer, dest, value, existence_requirement);
+
+			AssetPurchases::<T>::insert(buyer, asset_id, true);
 
 			Ok(())
 		}

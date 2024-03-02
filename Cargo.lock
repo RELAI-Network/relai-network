@@ -5819,9 +5819,11 @@ dependencies = [
 name = "relai-primitives"
 version = "0.1.0"
 dependencies = [
+ "frame-system",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
+ "sp-runtime",
  "sp-std",
 ]
 
