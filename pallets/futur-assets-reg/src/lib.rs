@@ -8,12 +8,15 @@ pub use relai_primitives::creatorsreg;
 pub mod pallet {
 	use super::*;
 	use frame_support::{
-		dispatch::DispatchResultWithPostInfo, ensure, pallet_prelude::*, traits::Currency,
+		dispatch::DispatchResultWithPostInfo,
+		ensure,
+		pallet_prelude::*,
+		traits::{Currency, ExistenceRequirement},
 	};
 
 	use frame_system::pallet_prelude::*;
 
-	use relai_primitives::assetsreg::{AssetId, Asset};
+	use relai_primitives::assetsreg::{Asset, AssetId};
 
 	pub type BalanceOf<T> =
 		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -33,15 +36,8 @@ pub mod pallet {
 	pub(super) type NextAssetId<T: Config> = StorageValue<_, u32, ValueQuery>;
 
 	#[pallet::storage]
-	pub(super) type AssetRegistry<T: Config> = StorageDoubleMap<
-		_,
-		Blake2_128Concat,
-		T::AccountId,
-		Blake2_128Concat,
-		AssetId,
-		Asset<T::AccountId, BalanceOf<T>>,
-		OptionQuery,
-	>;
+	pub(super) type AssetRegistry<T: Config> =
+		StorageMap<_, Blake2_128Concat, AssetId, Asset<T::AccountId, BalanceOf<T>>, OptionQuery>;
 
 	#[pallet::storage]
 	pub(super) type AssetByCreator<T: Config> =
@@ -85,7 +81,7 @@ pub mod pallet {
 		pub fn submit_asset(
 			origin: OriginFor<T>,
 			asset: Asset<T::AccountId, BalanceOf<T>>,
-			to_publish: bool
+			to_publish: bool,
 		) -> DispatchResultWithPostInfo {
 			let creator = ensure_signed(origin)?;
 
@@ -102,10 +98,7 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let creator = ensure_signed(origin)?;
 
-			ensure!(
-				AssetRegistry::<T>::contains_key(&creator, asset_id),
-				Error::<T>::AssetNotFound
-			);
+			ensure!(AssetRegistry::<T>::contains_key(&asset_id), Error::<T>::AssetNotFound);
 
 			AssetPublicationStatus::<T>::insert(asset_id, true);
 
@@ -122,10 +115,7 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let creator = ensure_signed(origin)?;
 
-			ensure!(
-				AssetRegistry::<T>::contains_key(&creator, asset_id),
-				Error::<T>::AssetNotFound
-			);
+			ensure!(AssetRegistry::<T>::contains_key(asset_id), Error::<T>::AssetNotFound);
 
 			AssetPublicationStatus::<T>::insert(asset_id, false);
 
@@ -140,7 +130,7 @@ pub mod pallet {
 			let creator = ensure_signed(origin)?;
 
 			ensure!(
-				AssetRegistry::<T>::contains_key(&creator, asset_id) &&
+				AssetRegistry::<T>::contains_key(asset_id) &&
 					AssetPublicationStatus::<T>::contains_key(asset_id),
 				Error::<T>::AssetNotFound
 			);
@@ -175,7 +165,6 @@ pub mod pallet {
 	}
 
 	impl<T: Config> Pallet<T> {
-
 		fn do_submit_asset(
 			creator: &T::AccountId,
 			asset: &Asset<T::AccountId, BalanceOf<T>>,
@@ -183,7 +172,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let asset_id = Self::handle_id();
 
-			AssetRegistry::<T>::insert(&creator, asset_id, &asset);
+			AssetRegistry::<T>::insert(asset_id, &asset);
 
 			AssetPublicationStatus::<T>::insert(asset_id, to_publish);
 
@@ -193,9 +182,18 @@ pub mod pallet {
 		}
 
 		fn do_buy_asset(buyer: &T::AccountId, asset_id: AssetId) -> DispatchResult {
-			//TODO: implement payment
-
-			//T::Currency::transfer(buyer, dest, value, existence_requirement);
+			if let Some(asset) = AssetRegistry::<T>::get(asset_id) {
+				if asset.price.is_some() {
+					let _ = T::Currency::transfer(
+						buyer,
+						&asset.creator.clone(),
+						asset.price.unwrap(),
+						ExistenceRequirement::KeepAlive,
+					);
+				}
+			} else {
+				Err(Error::<T>::AssetNotFound)?;
+			}
 
 			AssetPurchases::<T>::insert(buyer, asset_id, true);
 
