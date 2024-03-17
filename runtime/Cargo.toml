@@ -106,6 +106,9 @@ runtime-benchmarks = [
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 	"nft/runtime-benchmarks",
+	"futur-creators-reg/runtime-benchmarks",
+	"futur-assets-reg/runtime-benchmarks"
+
 ]
 try-runtime = [
 	"frame-try-runtime/try-runtime",

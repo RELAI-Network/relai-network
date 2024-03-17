@@ -1,5 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+pub mod weights;
+pub use weights::*;
+
 pub use pallet::*;
 
 pub use relai_primitives::creatorsreg;
@@ -27,6 +32,8 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+
+		type WeightInfo: WeightInfo;
 
 		type Currency: Currency<Self::AccountId, Balance = u128>;
 	}
@@ -77,7 +84,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::call_index(0)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::submit_asset())]
 		pub fn submit_asset(
 			origin: OriginFor<T>,
 			asset: Asset<T::AccountId, BalanceOf<T>>,
@@ -91,7 +98,7 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(1)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::publish_asset())]
 		pub fn publish_asset(
 			origin: OriginFor<T>,
 			asset_id: AssetId,
@@ -108,7 +115,7 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(2)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::un_publish_asset())]
 		pub fn un_publish_asset(
 			origin: OriginFor<T>,
 			asset_id: AssetId,
@@ -125,7 +132,7 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(3)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::delete_asset())]
 		pub fn delete_asset(origin: OriginFor<T>, asset_id: AssetId) -> DispatchResultWithPostInfo {
 			let creator = ensure_signed(origin)?;
 
@@ -142,6 +149,8 @@ pub mod pallet {
 				Error::<T>::AssetNotUnpublished
 			);
 
+			AssetRegistry::<T>::remove(asset_id);
+
 			AssetPublicationStatus::<T>::remove(asset_id);
 
 			Self::deposit_event(Event::AssetDeleted { creator, id: asset_id });
@@ -150,7 +159,7 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(4)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::buy_asset())]
 		pub fn buy_asset(origin: OriginFor<T>, asset_id: AssetId) -> DispatchResultWithPostInfo {
 			let buyer = ensure_signed(origin)?;
 

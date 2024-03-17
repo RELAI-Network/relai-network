@@ -3,14 +3,13 @@ use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 
-
 pub type AssetId = u32;
 
 #[derive(Encode, Decode, RuntimeDebug, Clone, Eq, PartialEq, MaxEncodedLen, TypeInfo)]
 pub enum AssetType {
 	App,
 	Game,
-	Book
+	Book,
 }
 
 #[derive(Encode, Decode, RuntimeDebug, Clone, Eq, PartialEq, MaxEncodedLen, TypeInfo)]
@@ -19,5 +18,5 @@ pub struct Asset<AccountId, Balance> {
 	pub asset_type: AssetType,
 	pub name: CommonMeta,
 	pub price: Option<Balance>,
-    pub meta: [u8; 32], // fixed-size array for SHA-256 hash
+	pub meta: [u8; 32], // fixed-size array for SHA-256 hash
 }

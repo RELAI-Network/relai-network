@@ -287,11 +287,13 @@ impl nft::Config for Runtime {
 
 impl futur_creators_reg::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = futur_creators_reg::weights::SubstrateWeight<Runtime>;
 	type Currency = Balances;
 }
 
 impl futur_assets_reg::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = futur_assets_reg::weights::SubstrateWeight<Runtime>;
 	type Currency = Balances;
 }
 
@@ -356,6 +358,8 @@ mod benches {
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
 		[pallet_sudo, Sudo]
+		[futur_creators_reg, FuturCreatorsReg]
+		[futur_assets_reg, FuturAssetsReg]
 	);
 }
 

@@ -1,5 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+pub mod weights;
+pub use weights::*;
+
+#[cfg(test)]
+mod mock;
+mod tests;
+
 pub use pallet::*;
 
 pub use relai_primitives::creatorsreg;
@@ -24,6 +33,8 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+
+		type WeightInfo: WeightInfo;
 
 		type Currency: Currency<Self::AccountId, Balance = u128>;
 	}
@@ -58,7 +69,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::call_index(0)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::set_registration_fee())]
 		pub fn set_registration_fee(
 			origin: OriginFor<T>,
 			amount: BalanceOf<T>,
@@ -73,7 +84,7 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(1)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::register_developer())]
 		pub fn register_developer(
 			origin: OriginFor<T>,
 			name: BoundedVec<u8, ConstU32<100>>,
@@ -98,7 +109,7 @@ pub mod pallet {
 			// Insert the new developer's information into the registry
 			DevRegistry::<T>::insert(&who, dev_infos);
 
-			//TODO: Withdraw from developar after setting where to put funds
+			//TODO: Withdraw from developer after setting where to put funds
 			/*
 			// Transfer the balance from the developer's account to the treasury
 			T::Currency::transfer(
@@ -116,12 +127,12 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(2)]
-		#[pallet::weight({10000})]
+		#[pallet::weight(T::WeightInfo::unregister_developer())]
 		pub fn unregister_developer(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
 			// Check if the developer's address exists in the registry
-			ensure!(!DevRegistry::<T>::contains_key(&who), Error::<T>::DevNotFound);
+			ensure!(DevRegistry::<T>::contains_key(&who), Error::<T>::DevNotFound);
 
 			// Remove developer's information from the registry
 			DevRegistry::<T>::remove(&who);
