@@ -14,6 +14,7 @@ pub type Balance = u128;
 frame_support::construct_runtime!(
 	pub struct Test {
 		System: frame_system,
+		Balances: pallet_balances,
 		FuturCreatorsReg: futur_creators_reg,
 	}
 );
@@ -42,11 +43,30 @@ impl frame_system::Config for Test {
 	type SS58Prefix = ConstU16<42>;
 	type OnSetCode = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type Currency = Balances;
 }
+
+parameter_types! {
+	pub const ExistentialDeposit: u64 = 1;
+}
+
+impl pallet_balances::Config for Test {
+	type Balance = Balance;
+	type DustRemoval = ();
+	type RuntimeEvent = RuntimeEvent;
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = System;
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type ReserveIdentifier = ();
+	type WeightInfo = ();
+}
+
 
 impl futur_creators_reg::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = ();
+	type WeightInfo = ();
 }
 
 // Build genesis storage according to the mock runtime.

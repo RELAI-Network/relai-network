@@ -17,6 +17,7 @@ pub struct Asset<AccountId, Balance> {
 	pub creator: AccountId,
 	pub asset_type: AssetType,
 	pub name: CommonMeta,
-	pub price: Option<Balance>,
-	pub meta: [u8; 32], // fixed-size array for SHA-256 hash
+	pub price: Balance,
+	pub hash: [u8; 32],
+	pub published:bool
 }
