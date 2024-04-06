@@ -10,14 +10,6 @@ Use the following command to build the node without launching it:
 cargo build --release
 ```
 
-### Embedded Docs
-
-After you build the project, you can use the following command to explore its parameters and subcommands:
-
-```sh
-./target/release/relai-network -h
-```
-
 
 ### Single-Node Development Chain
 
@@ -38,3 +30,16 @@ To start the development chain with detailed logging, run the following command:
 ```sh
 RUST_BACKTRACE=1 ./target/release/relai-network -ldebug --dev
 ```
+
+### Test
+
+To run unit test for `futur-assets-reg` and `futur-creators-reg` pallets
+
+```
+cargo test -p futur-assets-reg 
+```
+and 
+```
+cargo test -p futur-creatorss-reg 
+```
+Or just run `cargo test` for all tests

@@ -102,6 +102,9 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+
+		/// Extrinsic for submitting an asset
+		/// takes asset object as argument
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::submit_asset())]
 		pub fn submit_asset(
@@ -115,6 +118,9 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// Extrinsic for publishing or unpublishing an asset in the store
+		/// the asset will be available in FuturStore mobile app 
+		/// if pub_unpub argment is set to true 
 		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::pub_unpub_asset())]
 		pub fn pub_unpub_asset(
@@ -142,6 +148,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// Extrinsic for Deleting an asset
 		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::delete_asset())]
 		pub fn delete_asset(origin: OriginFor<T>, asset_id: AssetId) -> DispatchResultWithPostInfo {
@@ -162,6 +169,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// Extrinsic for buying an asset
 		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::buy_asset())]
 		pub fn buy_asset(origin: OriginFor<T>, asset_id: AssetId) -> DispatchResultWithPostInfo {
@@ -174,6 +182,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// Extrinsic for updating an asset
 		#[pallet::call_index(5)]
 		#[pallet::weight(T::WeightInfo::update_asset())]
 		pub fn update_asset(
