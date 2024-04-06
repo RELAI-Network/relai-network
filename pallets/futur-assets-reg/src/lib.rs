@@ -5,6 +5,10 @@ mod benchmarking;
 pub mod weights;
 pub use weights::*;
 
+mod mock;
+
+mod tests;
+
 pub use pallet::*;
 
 pub use relai_primitives::creatorsreg;
@@ -22,8 +26,9 @@ pub mod pallet {
 	use sp_runtime::offchain::{http, Duration};
 
 	use frame_system::pallet_prelude::*;
+	use sp_std::vec::Vec;
 
-	use relai_primitives::assetsreg::{Asset, AssetId};
+	use relai_primitives::assetsreg::{Asset, AssetId, ReviewsResponse};
 
 	pub type BalanceOf<T> =
 		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -45,6 +50,7 @@ pub mod pallet {
 	pub(super) type NextAssetId<T: Config> = StorageValue<_, u32, ValueQuery>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn asset_regisitry)]
 	pub(super) type AssetRegistry<T: Config> =
 		StorageMap<_, Blake2_128Concat, AssetId, Asset<T::AccountId, BalanceOf<T>>, OptionQuery>;
 
@@ -53,6 +59,7 @@ pub mod pallet {
 		StorageMap<_, Blake2_128Concat, AssetId, T::AccountId, OptionQuery>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn asset_purchases)]
 	pub(super) type AssetPurchases<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
@@ -60,6 +67,17 @@ pub mod pallet {
 		Blake2_128Concat,
 		AssetId,
 		bool,
+		OptionQuery,
+	>;
+
+	#[pallet::storage]
+	pub(super) type Reviews<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		Blake2_128Concat,
+		AssetId,
+		[u8; 32],
 		OptionQuery,
 	>;
 
@@ -72,6 +90,7 @@ pub mod pallet {
 		AssetDeleted { id: AssetId },
 		AssetBought { buyer: T::AccountId, id: AssetId },
 		AssetUpdated { id: AssetId },
+		ReviewSubmitted { reviewer: T::AccountId, id: AssetId },
 	}
 
 	#[pallet::error]
@@ -97,7 +116,7 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::un_publish_asset())]
+		#[pallet::weight(T::WeightInfo::pub_unpub_asset())]
 		pub fn pub_unpub_asset(
 			origin: OriginFor<T>,
 			asset_id: AssetId,
@@ -156,7 +175,7 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(5)]
-		#[pallet::weight(T::WeightInfo::submit_asset())]
+		#[pallet::weight(T::WeightInfo::update_asset())]
 		pub fn update_asset(
 			origin: OriginFor<T>,
 			asset_id: AssetId,
@@ -180,8 +199,8 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn offchain_worker(_block_number: BlockNumberFor<T>) {
-			log::info!("☎️ ☎️ ☎️ Fetching Reviews");
-			let _ = Self::do_fetch_reviews();
+			//log::info!("☎️ ☎️ ☎️ Fetching Reviews");
+			//let _ = Self::fetch_reviews();
 		}
 	}
 
@@ -193,6 +212,8 @@ pub mod pallet {
 			let asset_id = Self::handle_id();
 
 			AssetRegistry::<T>::insert(asset_id, &asset);
+
+			AssetByCreator::<T>::insert(asset_id, creator.clone());
 
 			Self::deposit_event(Event::AssetSubmited { creator: creator.clone(), id: asset_id });
 
@@ -238,9 +259,9 @@ pub mod pallet {
 			id
 		}
 
-		fn fetch_reviews() -> Result<(), http::Error> {
+		fn do_fetch_reviews() -> Result<(), http::Error> {
 			// Define the URL of your Firebase Cloud Function
-			let url = "http://127.0.0.1:5001/future-console/us-central1/reviews";
+			let url = "https://reviews-tskg7nm5aa-uc.a.run.app";
 
 			let deadline = sp_io::offchain::timestamp().add(Duration::from_millis(2_000));
 
@@ -251,15 +272,44 @@ pub mod pallet {
 			let response =
 				pending.try_wait(deadline).map_err(|_| http::Error::DeadlineReached)??;
 
-			log::info!(" ✅ Response from reviews : {:?}", response);
+			if response.code != 200 {
+				log::error!("Unexpected status code: {}", response.code);
+				return Ok(());
+			}
+
+			let body = response.body().collect::<Vec<u8>>();
+
+			let reviews_response: ReviewsResponse =
+				serde_json::from_slice(&body).map_err(|_| http::Error::IoError)?;
+
+			for review_bytes in reviews_response.reviews {
+				let review_str =
+					sp_std::str::from_utf8(&review_bytes).map_err(|_| http::Error::IoError)?;
+
+				// Use review_str as &str or convert to String if needed
+				/*
+				let review_string = sp_std::str::from_utf8(&review_bytes).map_err(|_| http::Error::IoError)?;
+				let parts: Vec<_> = review_string.split('/').collect();
+				if parts.len() != 3 {
+					log::error!("Invalid review string format: {}", review_string);
+					continue;
+				}
+
+				let substrate_address = parts[0];
+				let asset_id = parts[1].parse::<AssetId>().unwrap_or_default();
+				let review_hash: [u8; 32] = parts[2].as_bytes().to_vec().try_into().unwrap_or_default();
+				let account_id = T::AccountId::decode(&mut &substrate_address.as_bytes()[..])
+					.map_err(|_| http::Error::IoError)?;
+
+				Reviews::<T>::insert(&account_id, asset_id, review_hash);
+				*/
+			}
 
 			Ok(())
 		}
 
-		/// A helper function to fetch the price and send signed transaction.
-		fn do_fetch_reviews() -> Result<(), &'static str> {
-			let _ = Self::fetch_reviews().map_err(|_| "Failed to Reviews")?;
-
+		fn fetch_reviews() -> Result<(), &'static str> {
+			let _ = Self::do_fetch_reviews().map_err(|_| "Failed to Reviews")?;
 			Ok(())
 		}
 	}

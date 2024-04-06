@@ -155,7 +155,6 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
-		orml_nft: Default::default(),
-		futur_creators_reg: FuturDevRegGenesisConfig { registration_fee: 1000000 },
+		futur_creators_reg: FuturDevRegGenesisConfig { registration_fee: 10_000_000_000 },
 	}
 }

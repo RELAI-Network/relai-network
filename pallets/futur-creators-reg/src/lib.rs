@@ -5,8 +5,8 @@ mod benchmarking;
 pub mod weights;
 pub use weights::*;
 
-#[cfg(test)]
 mod mock;
+
 mod tests;
 
 pub use pallet::*;
@@ -109,16 +109,7 @@ pub mod pallet {
 			// Insert the new developer's information into the registry
 			DevRegistry::<T>::insert(&who, dev_infos);
 
-			//TODO: Withdraw from developer after setting where to put funds
-			/*
-			// Transfer the balance from the developer's account to the treasury
-			T::Currency::transfer(
-				&who,
-				&T::TreasuryAccount::get(),
-				amount,
-				ExistenceRequirement::AllowDeath,
-			)?;
-			*/
+			//TODO: Withdraw from developer after setting Treasury mecanismn to be defined
 
 			// Emit an event
 			Self::deposit_event(Event::DevRegistered { who, id });

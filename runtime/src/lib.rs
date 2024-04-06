@@ -46,8 +46,6 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-pub use nft;
-
 pub use futur_creators_reg;
 
 pub use futur_assets_reg;
@@ -271,20 +269,6 @@ impl pallet_sudo::Config for Runtime {
 	type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
 }
 
-impl orml_nft::Config for Runtime {
-	type ClassId = u32;
-	type TokenId = u64;
-	type ClassData = ();
-	type TokenData = ();
-	type MaxClassMetadata = ConstU32<1024>;
-	type MaxTokenMetadata = ConstU32<1024>;
-}
-
-impl nft::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = nft::weights::SubstrateWeight<Runtime>;
-}
-
 impl futur_creators_reg::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = futur_creators_reg::weights::SubstrateWeight<Runtime>;
@@ -307,8 +291,6 @@ construct_runtime!(
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
-		OrmlNFT: orml_nft,
-		NFT: nft,
 		FuturCreatorsReg: futur_creators_reg,
 		FuturAssetsReg: futur_assets_reg,
 	}

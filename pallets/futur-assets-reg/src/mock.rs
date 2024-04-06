@@ -7,7 +7,7 @@ use sp_runtime::{
 	BuildStorage,
 };
 
-use crate as futur_creators_reg;
+use crate as futur_assets_reg;
 
 type Block = frame_system::mocking::MockBlock<Test>;
 
@@ -18,7 +18,7 @@ frame_support::construct_runtime!(
 	pub struct Test {
 		System: frame_system,
 		Balances: pallet_balances,
-		FuturCreatorsReg: futur_creators_reg,
+		FuturAssetsReg: futur_assets_reg,
 	}
 );
 
@@ -64,10 +64,10 @@ impl pallet_balances::Config for Test {
 	type MaxHolds = ();
 }
 
-impl futur_creators_reg::Config for Test {
+impl futur_assets_reg::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
-	type WeightInfo = futur_creators_reg::weights::SubstrateWeight<Test>;
+	type WeightInfo = futur_assets_reg::weights::SubstrateWeight<Test>;
 }
 
 // Build genesis storage according to the mock runtime.

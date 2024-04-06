@@ -39,10 +39,9 @@ sp-transaction-pool = { workspace = true }
 sp-version = { workspace = true }
 
 # ORML 
-orml-nft = { workspace = true }
+#orml-nft = { workspace = true }
 
 #local pallets
-nft = { workspace = true }
 futur-creators-reg ={ workspace = true }
 futur-assets-reg ={ workspace = true }
 
@@ -90,8 +89,6 @@ std = [
 	"sp-transaction-pool/std",
 	"sp-version/std",
 	"substrate-wasm-builder",
-	"orml-nft/std",
-	"nft/std",
 	"futur-creators-reg/std",
 	"futur-assets-reg/std",
 ]
@@ -105,7 +102,6 @@ runtime-benchmarks = [
 	"pallet-sudo/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
-	"nft/runtime-benchmarks",
 	"futur-creators-reg/runtime-benchmarks",
 	"futur-assets-reg/runtime-benchmarks"
 
@@ -121,8 +117,6 @@ try-runtime = [
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
-	"orml-nft/try-runtime",
-	"nft/try-runtime",
 	"futur-creators-reg/try-runtime",
 	"futur-assets-reg/try-runtime"
 ]
