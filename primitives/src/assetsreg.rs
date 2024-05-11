@@ -1,12 +1,12 @@
 use crate::common::CommonMeta;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize,  Serialize};
 use sp_core::RuntimeDebug;
-use sp_std::prelude::Vec as SVec;
+use sp_std::prelude::Vec as SpVec;
 
+use scale_info::prelude::string::String;
 pub type AssetId = u32;
-pub type Reviews = SVec<SVec<u8>>;
 
 #[derive(Encode, Decode, RuntimeDebug, Clone, Eq, PartialEq, MaxEncodedLen, TypeInfo)]
 pub enum AssetType {
@@ -24,6 +24,10 @@ pub struct Asset<AccountId, Balance> {
 	pub hash: [u8; 32],
 	pub published: bool,
 }
+
+//pub type Reviews = SpVec<SpVec<u8>>;
+pub type Reviews = SpVec<String>;
+
 
 #[derive(Serialize, Deserialize, RuntimeDebug, Encode, Decode)]
 pub struct ReviewsResponse {

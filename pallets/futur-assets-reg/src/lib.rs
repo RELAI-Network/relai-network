@@ -11,7 +11,10 @@ mod tests;
 
 pub use pallet::*;
 
-pub use relai_primitives::creatorsreg;
+pub use relai_primitives::{
+	common::{CommonDesc, CommonMeta},
+	creatorsreg,
+};
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -74,12 +77,16 @@ pub mod pallet {
 	pub(super) type Reviews<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
-		T::AccountId,
+		CommonMeta,
 		Blake2_128Concat,
 		AssetId,
-		[u8; 32],
+		CommonDesc,
 		OptionQuery,
 	>;
+
+	#[pallet::storage]
+	pub(super) type Revs<T: Config> =
+		StorageMap<_, Blake2_128Concat, [u8; 48], bool, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -102,7 +109,6 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-
 		/// Extrinsic for submitting an asset
 		/// takes asset object as argument
 		#[pallet::call_index(0)]
@@ -119,8 +125,8 @@ pub mod pallet {
 		}
 
 		/// Extrinsic for publishing or unpublishing an asset in the store
-		/// the asset will be available in FuturStore mobile app 
-		/// if pub_unpub argment is set to true 
+		/// the asset will be available in FuturStore mobile app
+		/// if pub_unpub argment is set to true
 		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::pub_unpub_asset())]
 		pub fn pub_unpub_asset(
@@ -207,10 +213,7 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn offchain_worker(_block_number: BlockNumberFor<T>) {
-			//log::info!("☎️ ☎️ ☎️ Fetching Reviews");
-			//let _ = Self::fetch_reviews();
-		}
+		fn offchain_worker(_block_number: BlockNumberFor<T>) {}
 	}
 
 	impl<T: Config> Pallet<T> {
@@ -268,58 +271,7 @@ pub mod pallet {
 			id
 		}
 
-		fn do_fetch_reviews() -> Result<(), http::Error> {
-			// Define the URL of your Firebase Cloud Function
-			let url = "https://reviews-tskg7nm5aa-uc.a.run.app";
-
-			let deadline = sp_io::offchain::timestamp().add(Duration::from_millis(2_000));
-
-			let request = http::Request::get(url);
-
-			let pending = request.deadline(deadline).send().map_err(|_| http::Error::IoError)?;
-
-			let response =
-				pending.try_wait(deadline).map_err(|_| http::Error::DeadlineReached)??;
-
-			if response.code != 200 {
-				log::error!("Unexpected status code: {}", response.code);
-				return Ok(());
-			}
-
-			let body = response.body().collect::<Vec<u8>>();
-
-			let reviews_response: ReviewsResponse =
-				serde_json::from_slice(&body).map_err(|_| http::Error::IoError)?;
-
-			for review_bytes in reviews_response.reviews {
-				let review_str =
-					sp_std::str::from_utf8(&review_bytes).map_err(|_| http::Error::IoError)?;
-
-				// Use review_str as &str or convert to String if needed
-				/*
-				let review_string = sp_std::str::from_utf8(&review_bytes).map_err(|_| http::Error::IoError)?;
-				let parts: Vec<_> = review_string.split('/').collect();
-				if parts.len() != 3 {
-					log::error!("Invalid review string format: {}", review_string);
-					continue;
-				}
-
-				let substrate_address = parts[0];
-				let asset_id = parts[1].parse::<AssetId>().unwrap_or_default();
-				let review_hash: [u8; 32] = parts[2].as_bytes().to_vec().try_into().unwrap_or_default();
-				let account_id = T::AccountId::decode(&mut &substrate_address.as_bytes()[..])
-					.map_err(|_| http::Error::IoError)?;
-
-				Reviews::<T>::insert(&account_id, asset_id, review_hash);
-				*/
-			}
-
-			Ok(())
-		}
-
-		fn fetch_reviews() -> Result<(), &'static str> {
-			let _ = Self::do_fetch_reviews().map_err(|_| "Failed to Reviews")?;
-			Ok(())
-		}
 	}
+	
+
 }
